@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #007700;
+            color: white;
+        }
+
+        .hand {
+            border: 1px solid white;
+            padding: 10px;
+            margin: 10px;
+        }
+
+        .cards {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .card {
+            width: 60px;
+            height: 90px;
+            border: 1px solid white;
+            background-color: white;
+            color: black;
+            margin: 0 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blackjack Game</h1>
+    <div>
+        <label for="numPlayers">Number of Players (1-6): </label>
+        <input type="number" id="numPlayers" min="1" max="6" value="1">
+        <button id="startGame">Start Game</button>
+    </div>
+    <div id="gameArea" style="display: none;">
+        <div id="dealer" class="hand">
+            <h2>Dealer</h2>
+            <div class="cards"></div>
+            <div class="score"></div>
+            <button onclick="hitDealer()">Hit</button>
+        </div>
+        <div id="players"></div>
+        <button id="dealCards">Deal Cards</button>
+    </div>
+    <script>
+        document.getElementById('startGame').addEventListener('click', startGame);
+        document.getElementById('dealCards').addEventListener('click', dealCards);
+
+        let numPlayers = 1;
+        const deck = [];
+        const suits = ['♥', '♦', '♣', '♠'];
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+        let dealer = { hand: [], score: 0 };
+        const players = [];
+
+        function createDeck() {
+            deck.length = 0; // Clear the deck
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({ suit, value });
+                }
+            }
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function startGame() {
+            numPlayers = parseInt(document.getElementById('numPlayers').value);
+            document.getElementById('gameArea').style.display = 'block';
+
+            createDeck();
+            shuffleDeck();
+
+            const playersDiv = document.getElementById('players');
+            playersDiv.innerHTML = '';
+
+            for (let i = 1; i <= numPlayers; i++) {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'hand';
+                playerDiv.id = `player${i}`;
+                playerDiv.innerHTML = `<h2>Player ${i}</h2>
+                    <div class="cards"></div>
+                    <div class="score"></div>
+                    <button onclick="hit(${i})">Hit</button>`;
+                playersDiv.appendChild(playerDiv);
+            }
+        }
+
+        function dealCards() {
+            dealer = { hand: [], score: 0 };
+            players.length = 0;
+
+            for (let i = 0; i < numPlayers; i++) {
+                players.push({ hand: [], score: 0 });
+            }
+
+            // Deal initial two cards to each player and the dealer
+            for (let i = 0; i < 2; i++) {
+                dealer.hand.push(deck.pop());
+                for (let j = 0; j < numPlayers; j++) {
+                    players[j].hand.push(deck.pop());
+                }
+            }
+
+            updateUI();
+        }
+
+        function updateUI() {
+            const dealerDiv = document.getElementById('dealer');
+            const dealerCardsDiv = dealerDiv.querySelector('.cards');
+            dealerCardsDiv.innerHTML = '';
+            dealer.hand.forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'card';
+                cardDiv.textContent = `${card.value}${card.suit}`;
+                dealerCardsDiv.appendChild(cardDiv);
+            });
+
+            players.forEach((player, index) => {
+                const playerDiv = document.getElementById(`player${index + 1}`);
+                const playerCardsDiv = playerDiv.querySelector('.cards');
+                playerCardsDiv.innerHTML = '';
+                player.hand.forEach(card => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'card';
+                    cardDiv.textContent = `${card.value}${card.suit}`;
+                    playerCardsDiv.appendChild(cardDiv);
+                });
+            });
+        }
+
+        function hit(playerIndex) {
+            const newCard = deck.pop();
+            players[playerIndex - 1].hand.push(newCard);
+            updateUI();
+            // Update player score (this part should be expanded to include score calculation)
+        }
+
+        function hitDealer() {
+            const newCard = deck.pop();
+            dealer.hand.push(newCard);
+            updateUI();
+            // Update dealer score (this part should be expanded to include score calculation)
+        }
+    </script>
+</body>
+</html>
